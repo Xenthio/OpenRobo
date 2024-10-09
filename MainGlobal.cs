@@ -49,9 +49,11 @@ public class MainGlobal
 		//Client.RoleCreated += Events.RoleCreated;
 		//Client.GuildMemberUpdated += Events.GuildMemberUpdated;
 
+		Settings.LoadOrCreateGlobalConfig();
+
 		// no longer seems to work - used to detect user joining VC and remove their deny send msg perm to the vc chat text channel
 		// Client.UserVoiceStateUpdated += Events.UserVoiceStateUpdated;
-		await Client.LoginAsync(TokenType.Bot, Settings.Token);
+		await Client.LoginAsync(TokenType.Bot, Settings.Config.Token);
 
 		await Client.StartAsync();
 
