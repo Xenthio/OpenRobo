@@ -58,6 +58,8 @@ internal class CommandSystem
 	[Events.MessageRecieved]
 	public static void MessageRecieved(SocketMessage socketMessage)
 	{
+		if (socketMessage.Author.IsWebhook) return;
+		if (socketMessage.Author.IsBot) return;
 		foreach (var prefix in Prefixes)
 		{
 			if (socketMessage.Content.StartsWith(prefix))

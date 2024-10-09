@@ -10,6 +10,8 @@ namespace OpenRobo.Levelling
 		[Events.MessageRecieved]
 		public static void MessageRecieved(SocketMessage socketMessage)
 		{
+			if (socketMessage.Author.IsWebhook) return;
+			if (socketMessage.Author.IsBot) return;
 			// Check if we should give Xp
 			if (!IsOnXPCooldown(socketMessage.Channel.Id, socketMessage.Author.Id))
 			{
