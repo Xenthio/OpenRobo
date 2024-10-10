@@ -13,7 +13,6 @@ namespace OpenRobo.Database
 		public int XP { get; set; }
 
 		public bool IsMuted { get; set; }
-
 		public long MutedUntil { get; set; }
 	}
 }
