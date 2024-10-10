@@ -10,7 +10,6 @@ internal class Mutes
 	[Events.Tick]
 	public static void DoMuteTick()
 	{
-		Log.Info("mute tick");
 		// Not quite sure how to do this nicely...
 		foreach (var server in ServerInstance.Instances)
 		{
