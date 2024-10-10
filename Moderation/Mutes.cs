@@ -10,7 +10,7 @@ internal class Mutes
 	[Events.Tick]
 	public static void DoMuteTick()
 	{
-		// Not quite sure how to do this nicely...
+		// TODO: On a server instance's initial load, we should maybe load muted users once? this is sorta fine for now
 		foreach (var server in ServerInstance.Instances)
 		{
 			foreach (var muteduser in server.Database.Users.Where(x => x.IsMuted && TimeUtil.TimeNow() >= x.MutedUntil))
