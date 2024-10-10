@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using OpenRobo.Database;
+using OpenRobo.Utils;
 using static OpenRobo.CommandSystem;
 
 namespace OpenRobo.Levelling
@@ -44,8 +45,8 @@ namespace OpenRobo.Levelling
 
 		public static void GiveXP(SocketGuild server, SocketUser user, int xp)
 		{
-			var db = ServerDatabase.LoadOrCreateServerDB(server);
-			var userdata = db.GetOrRegisterUser(user);
+			var serverInstance = ServerInstance.GetOrCreateServerInstance(server);
+			var userdata = serverInstance.GetOrRegisterUser(user);
 
 			userdata.XP += xp;
 
@@ -58,9 +59,9 @@ namespace OpenRobo.Levelling
 				userdata.XP = 0;
 
 				// If level announcements are setup, do them.
-				if (db.Config.LevellingAnnouncementChannel != 0)
+				if (serverInstance.Config.LevellingAnnouncementChannel != 0)
 				{
-					if (MainGlobal.Client.GetChannel(db.Config.LevellingAnnouncementChannel) is IMessageChannel chn)
+					if (MainGlobal.Client.GetChannel(serverInstance.Config.LevellingAnnouncementChannel) is IMessageChannel chn)
 					{
 						chn.SendMessageAsync($"<@{user.Id}> has leveled up to {userdata.Level}");
 					}
@@ -69,44 +70,44 @@ namespace OpenRobo.Levelling
 				// check if leveling up means we should assign a role.
 				if (user is SocketGuildUser guildUser)
 				{
-					foreach (var reward in db.Config.LevellingRoleRewards)
+					foreach (var reward in serverInstance.Config.LevellingRoleRewards)
 					{
 						if (userdata.Level >= reward.Key) guildUser.AddRoleAsync(server.GetRole(reward.Value));
 					}
 				}
 			}
-			db.SaveChanges();
+			serverInstance.SaveChanges();
 		}
 		public static void TakeXP(SocketGuild server, SocketUser user, int xp)
 		{
-			var db = ServerDatabase.LoadOrCreateServerDB(server);
-			var userdata = db.GetOrRegisterUser(user);
+			var serverInstance = ServerInstance.GetOrCreateServerInstance(server);
+			var userdata = serverInstance.GetOrRegisterUser(user);
 
 			userdata.XP -= xp;
-			db.SaveChanges();
+			serverInstance.SaveChanges();
 		}
 		public static void SetXP(SocketGuild server, SocketUser user, int xp)
 		{
-			var db = ServerDatabase.LoadOrCreateServerDB(server);
-			var userdata = db.GetOrRegisterUser(user);
+			var serverInstance = ServerInstance.GetOrCreateServerInstance(server);
+			var userdata = serverInstance.GetOrRegisterUser(user);
 
 			userdata.XP = xp;
-			db.SaveChanges();
+			serverInstance.SaveChanges();
 		}
 
 		public static void SetLevel(SocketGuild server, SocketUser user, int level)
 		{
-			var db = ServerDatabase.LoadOrCreateServerDB(server);
-			var userdata = db.GetOrRegisterUser(user);
+			var serverInstance = ServerInstance.GetOrCreateServerInstance(server);
+			var userdata = serverInstance.GetOrRegisterUser(user);
 
 			userdata.Level = level;
-			db.SaveChanges();
+			serverInstance.SaveChanges();
 		}
 
 		[ChatCommand("rank")]
 		public static void CheckLevel(SocketMessage socketMessage)
 		{
-			var db = ServerDatabase.LoadOrCreateServerDB((socketMessage.Channel as SocketGuildChannel).Guild);
+			var db = ServerInstance.GetOrCreateServerInstance((socketMessage.Channel as SocketGuildChannel).Guild);
 			var userdata = db.GetOrRegisterUser(socketMessage.Author);
 			var nextlvl = XpRequiredForLevelUp(userdata.Level);
 			var needed = nextlvl - userdata.XP;
@@ -151,7 +152,7 @@ namespace OpenRobo.Levelling
 			var guilduser = (socketMessage.Author as SocketGuildUser);
 			if (guilduser.GuildPermissions.Administrator)
 			{
-				var db = ServerDatabase.LoadOrCreateServerDB(guild);
+				var db = ServerInstance.GetOrCreateServerInstance(guild);
 				db.Config.LevellingAnnouncementChannel = ulong.Parse(chnlID);
 				socketMessage.Channel.SendMessageAsync($"Set level announcement channel to <#{chnlID}>");
 				db.SaveServerConfig();
@@ -162,14 +163,14 @@ namespace OpenRobo.Levelling
 		{
 			var cmdparams = socketMessage.Content.Split(" ");
 
-			var role = ulong.Parse(cmdparams.Last());
+			var role = CommandUtils.ParseToRoleID(cmdparams.Last());
 			var level = int.Parse(cmdparams[1]);
 
 			var guild = (socketMessage.Channel as SocketGuildChannel).Guild;
 			var guilduser = (socketMessage.Author as SocketGuildUser);
 			if (guilduser.GuildPermissions.Administrator)
 			{
-				var db = ServerDatabase.LoadOrCreateServerDB(guild);
+				var db = ServerInstance.GetOrCreateServerInstance(guild);
 				db.Config.LevellingRoleRewards[level] = role;
 				socketMessage.Channel.SendMessageAsync($"Set level {level} reward to <@&{role}>");
 				db.SaveServerConfig();

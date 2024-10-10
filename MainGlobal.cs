@@ -1,8 +1,6 @@
 ﻿
 using Discord;
 using Discord.WebSocket;
-
-using System.Timers;
 namespace OpenRobo;
 
 public class MainGlobal
@@ -59,13 +57,18 @@ public class MainGlobal
 
 		ApplicationInfo = await Client.GetApplicationInfoAsync();
 
+		Console.WriteLine($"|{DateTime.Now} | Starting tick loop...");
+		Loop = new System.Timers.Timer()
+		{
+			Interval = 5500,
+			AutoReset = true,
+			Enabled = true
+		};
+		Loop.Elapsed += Events.Tick;
+
 		// Block this task until the program is closed.
 		await Task.Delay(-1);
 		Log.Info("Shutting down.");
-		Database.ServerDatabase.SaveAll();
-	}
-	private static void Tick(object sender, ElapsedEventArgs e)
-	{
-
+		Database.ServerInstance.SaveAll();
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using System.Reflection;
+using System.Timers;
 
 namespace OpenRobo;
 
@@ -29,6 +30,10 @@ public class Events
 	public static async Task ReactionAdded(Cacheable<IUserMessage, ulong> cachedUserMessage, Cacheable<IMessageChannel, ulong> cachedChannel, SocketReaction socketReaction)
 	{
 		RunEvent<ReactionAddedAttribute>(cachedUserMessage, cachedChannel, socketReaction);
+	}
+	public static async void Tick(object sender, ElapsedEventArgs e)
+	{
+		RunEvent<TickAttribute>();
 	}
 
 	public static void RunEvent<T>(params object[] prms)
@@ -61,4 +66,8 @@ public class Events
 
 	[System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = true)]
 	public class ReactionAddedAttribute : System.Attribute { }
+
+
+	[System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = true)]
+	public class TickAttribute : System.Attribute { }
 }

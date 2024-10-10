@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OpenRobo.Database
 {
@@ -6,17 +7,13 @@ namespace OpenRobo.Database
 	{
 		[NotMapped]
 		public string Username { get; set; } = "UnknownUser";
+		[Required]
 		public ulong ID { get; set; }
 		public int Level { get; set; }
 		public int XP { get; set; }
 
-		[NotMapped]
 		public bool IsMuted { get; set; }
 
-		[NotMapped]
 		public long MutedUntil { get; set; }
-
-		[NotMapped]
-		public long TimeLastXPReward { get; set; }
 	}
 }
