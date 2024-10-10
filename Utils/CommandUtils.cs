@@ -21,4 +21,15 @@ internal class CommandUtils
 		if (IDRegex.IsMatch(str)) return ulong.Parse(IDRegex.Match(str).Value);
 		return ulong.Parse(str);
 	}
+	public static bool TryParseToBool(string str, out bool boolout)
+	{
+		if (str.ToUpper() == "ON") { boolout = true; return true; }
+		if (str.ToUpper() == "OFF") { boolout = false; return true; }
+		if (str.ToUpper() == "TRUE") { boolout = true; return true; }
+		if (str.ToUpper() == "FALSE") { boolout = false; return true; }
+		if (str.ToUpper() == "1") { boolout = true; return true; }
+		if (str.ToUpper() == "0") { boolout = false; return true; }
+		boolout = false;
+		return false;
+	}
 }
