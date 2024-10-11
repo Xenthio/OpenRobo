@@ -5,10 +5,41 @@ using static OpenRobo.CommandSystem;
 
 namespace OpenRobo.Moderation;
 
+internal class UserSpamOffenceTracker
+{
+	public int ChatSmall = 0;
+	public int ChatMedium = 0;
+	public int ChatLarge = 0;
+	public int ChatHuge = 0;
+
+	public void AddCooldownPointForCategory(int category, int points)
+	{
+		if (category == 1) ChatSmall += points;
+		if (category == 2) ChatMedium += points;
+		if (category == 3) ChatLarge += points;
+		if (category == 4) ChatHuge += points;
+	}
+	public bool ShouldMute()
+	{
+		if (ChatSmall >= 8) return true;
+		if (ChatMedium >= 4) return true;
+		if (ChatLarge >= 3) return true;
+		if (ChatHuge >= 2) return true;
+		return false;
+	}
+
+	public bool ShouldDispose()
+	{
+		if (ChatSmall <= 0 &&
+			ChatMedium <= 0 &&
+			ChatLarge <= 0 &&
+			ChatHuge <= 0) return true;
+		return false;
+	}
+}
 internal class SpamFilter
 {
-	public static Dictionary<ulong, int> UserSpamCounter = new();
-	public static Dictionary<ulong, int> UserMuteCounter = new();
+	public static Dictionary<ulong, UserSpamOffenceTracker> UserSpamOffences = new();
 	[Events.MessageRecieved]
 	public static void MessageRecieved(SocketMessage socketMessage)
 	{
@@ -19,42 +50,37 @@ internal class SpamFilter
 			if (serverInstance.Config.SpamFilteredChannels.Contains(socketMessage.Channel.Id) && socketMessage.Author is SocketGuildUser user)
 			{
 				var userid = socketMessage.Author.Id;
-				CountCooldown(userid);
-				if (UserSpamCounter.ContainsKey(userid) && UserSpamCounter[userid] > GetCooldownThresholdForUser(userid))
+				DoMessageSpecificCooldown(userid, socketMessage.Content);
+				if (UserSpamOffences.ContainsKey(userid) && UserSpamOffences[userid].ShouldMute())
 				{
 					Mutes.MuteUser(user, GetCooldownTimeForUser(userid));
-
 				}
 			}
 		}
 	}
-	public static async Task CountCooldown(ulong userid)
+	public static async Task DoMessageSpecificCooldown(ulong userid, string message)
 	{
-		if (!UserSpamCounter.ContainsKey(userid))
-			UserSpamCounter[userid] = 1;
-		else
-			UserSpamCounter[userid] += 1;
-		Log.Verbose($"spam filter counter for {userid}: {UserSpamCounter[userid]}");
-		await Task.Delay(2 * 1000);
-		UserSpamCounter[userid] -= 1;
-		if (UserSpamCounter[userid] <= 0) UserSpamCounter.Remove(userid);
+		if (!UserSpamOffences.ContainsKey(userid)) UserSpamOffences[userid] = new UserSpamOffenceTracker();
+		GetCooldownCategoryForUserAndMessage(userid, message, out var category, out var time);
+		UserSpamOffences[userid].AddCooldownPointForCategory(category, 1);
+		await Task.Delay(time * 1000);
+		UserSpamOffences[userid].AddCooldownPointForCategory(category, -1);
+		if (UserSpamOffences[userid].ShouldDispose()) UserSpamOffences.Remove(userid);
+
 	}
 
-	public static int GetCooldownThresholdForUser(ulong userid)
+	public static void GetCooldownCategoryForUserAndMessage(ulong userid, string message, out int category, out int cooldowntime)
 	{
-		// Todo: bias with user level
-		return 5;
-	}
-	public static async Task CountMute(ulong userid)
-	{
-		if (!UserMuteCounter.ContainsKey(userid))
-			UserMuteCounter[userid] = 1;
-		else
-			UserMuteCounter[userid] += 1;
-		Log.Verbose($"spam filter mute counter for {userid}: {UserMuteCounter[userid]}");
-		await Task.Delay(120 * 1000);
-		UserMuteCounter[userid] -= 1;
-		if (UserMuteCounter[userid] <= 0) UserMuteCounter.Remove(userid);
+		var lines = message.Split('\n').Count();
+		var letters = message.Count();
+
+		category = 0; cooldowntime = 0;
+
+		if (lines <= 1) { category = 1; cooldowntime = 4; }
+		if ((lines >= 2 && lines <= 3) || letters >= 180) { category = 2; cooldowntime = 18; }
+		if ((lines >= 3 && lines <= 5) || letters >= 260) { category = 3; cooldowntime = 35; }
+		if (lines >= 5 || letters >= 300) { category = 4; cooldowntime = 61; }
+		// Todo: bias with user level 
 	}
 	public static int GetCooldownTimeForUser(ulong userid)
 	{
