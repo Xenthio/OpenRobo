@@ -67,7 +67,16 @@ internal class Mutes
 			}
 
 			MuteUser(targetuser, time);
-			socketMessage.Channel.SendMessageAsync($"{targetuser.Username} has been muted for {timestring}.");
+			var db = ServerInstance.GetOrCreateServerInstance(guild);
+			var dbuser = db.GetOrRegisterUser(targetuser);
+			if (!dbuser.IsMuted)
+			{
+				socketMessage.Channel.SendMessageAsync($"{targetuser.Username} has been muted for {timestring}.");
+			}
+			else
+			{
+				socketMessage.Channel.SendMessageAsync($"{targetuser.Username} mute changed to {timestring}.");
+			}
 
 		}
 	}

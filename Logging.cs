@@ -1,4 +1,7 @@
 ﻿using Discord;
+using Discord.WebSocket;
+using OpenRobo.Commands;
+using OpenRobo.Database;
 
 namespace OpenRobo;
 
@@ -48,4 +51,31 @@ public class Log
 		else if (Msg.Exception != null)
 			Console.WriteLine($"|{DateTime.Now} - {Msg.Source} | {Msg.Exception}");
 	}
+
+
+	public static void InServer(SocketGuild guild, string message)
+	{
+		var serverInstance = ServerInstance.GetOrCreateServerInstance(guild);
+		if (serverInstance.Config.DebugLogChannel != 0)
+		{
+			var channel = guild.GetTextChannel(serverInstance.Config.DebugLogChannel);
+			channel.SendMessageAsync(message);
+		}
+	}
+
+	[ChatCommand("setdebuglog")]
+	public static void SetDebugLogChannel(SocketMessage socketMessage)
+	{
+		var chnlID = socketMessage.Content.Split(" ").Last();
+		var guild = (socketMessage.Channel as SocketGuildChannel).Guild;
+		var guilduser = (socketMessage.Author as SocketGuildUser);
+		if (guilduser.GuildPermissions.Administrator)
+		{
+			var db = ServerInstance.GetOrCreateServerInstance(guild);
+			db.Config.DebugLogChannel = ulong.Parse(chnlID);
+			socketMessage.Channel.SendMessageAsync($"Set debug logging channel to <#{chnlID}>");
+			db.SaveServerConfig();
+		}
+	}
+
 }

@@ -12,6 +12,10 @@ internal class UserSpamOffenceTracker
 	public int ChatLarge = 0;
 	public int ChatHuge = 0;
 
+	public int Embed = 0;
+	public int React = 0;
+	public int Ping = 0;
+
 	public void AddCooldownPointForCategory(int category, int points)
 	{
 		if (category == 1) ChatSmall += points;
@@ -25,6 +29,11 @@ internal class UserSpamOffenceTracker
 		if (ChatMedium >= 4) return true;
 		if (ChatLarge >= 3) return true;
 		if (ChatHuge >= 2) return true;
+
+		if (Embed >= 8) return true;
+		if (React >= 10) return true;
+		if (Ping >= 9) return true;
+
 		return false;
 	}
 
@@ -33,7 +42,10 @@ internal class UserSpamOffenceTracker
 		if (ChatSmall <= 0 &&
 			ChatMedium <= 0 &&
 			ChatLarge <= 0 &&
-			ChatHuge <= 0) return true;
+			ChatHuge <= 0 &&
+			Embed <= 0 &&
+			React <= 0 &&
+			Ping <= 0) return true;
 		return false;
 	}
 }
@@ -53,7 +65,9 @@ internal class SpamFilter
 				DoMessageSpecificCooldown(userid, socketMessage.Content);
 				if (UserSpamOffences.ContainsKey(userid) && UserSpamOffences[userid].ShouldMute())
 				{
-					Mutes.MuteUser(user, GetCooldownTimeForUser(userid));
+					var time = GetSpamMuteTimeForUser(userid);
+					Log.InServer(guild, $"Gave a spam filter mute to <@{userid}> for {time} seconds.");
+					Mutes.MuteUser(user, time);
 				}
 			}
 		}
@@ -82,7 +96,7 @@ internal class SpamFilter
 		if (lines >= 5 || letters >= 300) { category = 4; cooldowntime = 61; }
 		// Todo: bias with user level 
 	}
-	public static int GetCooldownTimeForUser(ulong userid)
+	public static int GetSpamMuteTimeForUser(ulong userid)
 	{
 		// Todo: bias with recent mutes in last 2 minutes (see function CountMute())
 		return 30;
