@@ -1,7 +1,7 @@
 ﻿using Discord.WebSocket;
 using System.Reflection;
 
-namespace OpenRobo;
+namespace OpenRobo.Commands;
 
 internal class CommandSystem
 {
@@ -89,14 +89,14 @@ internal class CommandSystem
 			method.Invoke(null, new object[] { message });
 		}
 	}
+}
 
-	[System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = true)]
-	public class ChatCommandAttribute : System.Attribute
+[System.AttributeUsage(System.AttributeTargets.Method, AllowMultiple = true)]
+public class ChatCommandAttribute : System.Attribute
+{
+	public string Command;
+	public ChatCommandAttribute(string cmd)
 	{
-		public string Command;
-		public ChatCommandAttribute(string cmd)
-		{
-			this.Command = cmd;
-		}
+		this.Command = cmd;
 	}
 }

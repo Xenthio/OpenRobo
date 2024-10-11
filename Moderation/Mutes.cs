@@ -1,7 +1,7 @@
 ﻿using Discord.WebSocket;
+using OpenRobo.Commands;
 using OpenRobo.Database;
 using OpenRobo.Utils;
-using static OpenRobo.CommandSystem;
 
 namespace OpenRobo.Moderation;
 

@@ -1,5 +1,4 @@
 ﻿using Discord.WebSocket;
-using static OpenRobo.CommandSystem;
 
 namespace OpenRobo.Commands
 {
