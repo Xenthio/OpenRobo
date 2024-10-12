@@ -1,14 +1,77 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="WebUI\wwwroot\css\site.css" />
+    <Content Include="WebUI\wwwroot\favicon.ico" />
+    <Content Include="WebUI\wwwroot\js\site.js" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css.map" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.css" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.css.map" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.min.css" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.min.css.map" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css.map" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.min.css" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.min.css.map" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.css" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.css.map" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.min.css" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.min.css.map" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.css" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.css.map" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.min.css" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.min.css.map" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.css" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.css.map" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.min.css" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.min.css.map" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap.css" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap.css.map" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap.min.css" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap.min.css.map" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.css" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.css.map" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.min.css" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.min.css.map" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js.map" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js.map" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\js\bootstrap.esm.js" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\js\bootstrap.esm.js.map" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\js\bootstrap.esm.min.js" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\js\bootstrap.esm.min.js.map" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\js\bootstrap.js" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\js\bootstrap.js.map" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\js\bootstrap.min.js" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\dist\js\bootstrap.min.js.map" />
+    <Content Include="WebUI\wwwroot\lib\bootstrap\LICENSE" />
+    <Content Include="WebUI\wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.js" />
+    <Content Include="WebUI\wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.min.js" />
+    <Content Include="WebUI\wwwroot\lib\jquery-validation-unobtrusive\LICENSE.txt" />
+    <Content Include="WebUI\wwwroot\lib\jquery-validation\dist\additional-methods.js" />
+    <Content Include="WebUI\wwwroot\lib\jquery-validation\dist\additional-methods.min.js" />
+    <Content Include="WebUI\wwwroot\lib\jquery-validation\dist\jquery.validate.js" />
+    <Content Include="WebUI\wwwroot\lib\jquery-validation\dist\jquery.validate.min.js" />
+    <Content Include="WebUI\wwwroot\lib\jquery-validation\LICENSE.md" />
+    <Content Include="WebUI\wwwroot\lib\jquery\dist\jquery.js" />
+    <Content Include="WebUI\wwwroot\lib\jquery\dist\jquery.min.js" />
+    <Content Include="WebUI\wwwroot\lib\jquery\dist\jquery.min.map" />
+    <Content Include="WebUI\wwwroot\lib\jquery\LICENSE.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Discord.Net" Version="3.16.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.10">
       <PrivateAssets>all</PrivateAssets>

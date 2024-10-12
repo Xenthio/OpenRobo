@@ -1,0 +1,30 @@
+﻿@page
+@model ServerModel
+@{
+	ViewData["Title"] = "server list";
+}
+@using OpenRobo;
+
+<div>
+	<h1>Server List</h1>
+	@foreach (var server in MainGlobal.Client.Guilds)
+	{
+		<div class="card">
+			<div class="row g-0">
+				<div class="col-md-auto">
+					<img class="img-fluid rounded-start" width="150" height="150" src="@(server.IconUrl)" />
+				</div>
+				<div class="col-md-auto">
+					<div class="card-body">
+						<p class="card-title">@(server.Name)</p>
+						<p class="card-text"><small class="text-muted">@(server.Id)</small></p>
+						<div>
+							<a class="btn btn-primary" href=@($"/Servers/{server.Id}/Configure")>Configure</a>
+							<a class="btn btn-primary" href=@($"/Servers/{server.Id}/Leaderboard")>Leaderboard</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+</div>
