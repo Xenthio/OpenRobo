@@ -1,0 +1,50 @@
+﻿@page "/Servers/{serverid}/Configure"
+@model ConfigureModel
+@{
+	ViewData["Title"] = "server list";
+}
+@using System.Reflection;
+@using OpenRobo;
+@using OpenRobo.Database;
+
+<div>
+	<h1>Server Settings</h1>
+	@{
+		var g = MainGlobal.Client.GetGuild(ulong.Parse((string)(RouteData.Values["serverid"])));
+		var b = OpenRobo.Database.ServerInstance.GetOrCreateServerInstance(g);
+	}
+	<div class="d-grid gap-2">
+		@foreach (var setting in typeof(ServerConfig).GetProperties())
+		{
+			var value = setting.GetValue(b.Config);
+			if (setting != null )
+			{
+				<div class="border rounded">
+					<div class="row g-0 align-items-center"> 
+						<h4 class="p-2 col">@(setting.Name)</h4>
+						@if (value is Dictionary<int, ulong> dictionary) { 
+							@foreach (var levelrolecombo in dictionary)
+							{
+								<div class="row">
+									<div class="p-2 col">
+										<div>@("Level")</div>
+										@Html.TextBoxFor(m => levelrolecombo.Key, new { @class = "form-control" })
+									</div>
+									<div class="p-2 col">
+										<div>@("Role Id")</div>
+										@Html.TextBoxFor(m => levelrolecombo.Value, new { @class = "form-control" })
+									</div>
+								</div>
+							}
+						} else
+						{
+							<div class="p-2 col-3">
+								@Html.TextBoxFor(m => value, new { @class = "form-control" })
+							</div>
+						}
+					</div>
+				</div>
+			}
+		}
+	</div>
+</div>
