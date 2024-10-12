@@ -54,10 +54,12 @@ internal class ServerInstance
 		Server = server;
 		var folder = System.IO.Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "OpenRobo", "ServerData", $"{Server.Id}");
 		var path = System.IO.Path.Join(folder, $"database.db");
-		Database = new ServerDatabase(path);
-		Database.Database.Migrate();
-		Log.Info($"Loading Database: {path}");
 		LoadOrCreateServerConfig();
+		Database = new ServerDatabase(path);
+		Database.Database.EnsureCreated();
+		if (Database.Database.GetPendingMigrations().Any())
+			Database.Database.Migrate();
+		Log.Info($"Loading Database: {path}");
 	}
 	public User GetOrRegisterUser(SocketUser socketUser)
 	{
