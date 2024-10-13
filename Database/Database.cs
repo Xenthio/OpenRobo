@@ -56,9 +56,10 @@ internal class ServerInstance
 		var path = System.IO.Path.Join(folder, $"database.db");
 		LoadOrCreateServerConfig();
 		Database = new ServerDatabase(path);
-		Database.Database.EnsureCreated();
-		if (Database.Database.GetPendingMigrations().Any())
-			Database.Database.Migrate();
+		Database.Database.Migrate();
+		//Database.Database.EnsureCreated();
+		//if (Database.Database.GetPendingMigrations().Any())
+		//Database.Database.Migrate();
 		Log.Info($"Loading Database: {path}");
 	}
 	public User GetOrRegisterUser(SocketUser socketUser)

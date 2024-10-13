@@ -1,4 +1,5 @@
-﻿using Discord.WebSocket;
+﻿using Discord;
+using Discord.WebSocket;
 using OpenRobo.Commands;
 using OpenRobo.Database;
 using OpenRobo.Utils;
@@ -72,6 +73,26 @@ internal class SpamFilter
 			}
 		}
 	}
+	[Events.ReactionAdded]
+	public static void ReactionAdded(Cacheable<IUserMessage, ulong> cachedUserMessage, Cacheable<IMessageChannel, ulong> cachedChannel, SocketReaction socketReaction)
+	{
+		if (cachedChannel.Value is SocketGuildChannel channel && cachedUserMessage.Value is SocketUserMessage msg && socketReaction.User.Value is SocketGuildUser user)
+		{
+			var guild = channel.Guild;
+			var serverInstance = ServerInstance.GetOrCreateServerInstance(guild);
+			if (serverInstance.Config.SpamFilteredChannels.Contains(channel.Id))
+			{
+				var userid = user.Id;
+				DoReactCooldown(userid);
+				if (UserSpamOffences.ContainsKey(userid) && UserSpamOffences[userid].ShouldMute())
+				{
+					var time = GetSpamMuteTimeForUser(userid);
+					Log.InServer(guild, $"Gave a embed spam filter mute to <@{userid}> for {time} seconds.");
+					Mutes.MuteUser(user, time);
+				}
+			}
+		}
+	}
 	public static async Task DoMessageSpecificCooldown(ulong userid, string message)
 	{
 		if (!UserSpamOffences.ContainsKey(userid)) UserSpamOffences[userid] = new UserSpamOffenceTracker();
@@ -80,6 +101,10 @@ internal class SpamFilter
 		await Task.Delay(time * 1000);
 		UserSpamOffences[userid].AddCooldownPointForCategory(category, -1);
 		if (UserSpamOffences[userid].ShouldDispose()) UserSpamOffences.Remove(userid);
+
+	}
+	public static async Task DoReactCooldown(ulong userid)
+	{
 
 	}
 
