@@ -14,5 +14,11 @@ namespace OpenRobo.Database
 
 		public bool IsMuted { get; set; }
 		public long MutedUntil { get; set; }
+
+		public bool IsImageMuted { get; set; }
+		public long ImageMutedUntil { get; set; }
+
+		public bool IsReactMuted { get; set; }
+		public long ReactMutedUntil { get; set; }
 	}
 }

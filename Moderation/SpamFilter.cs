@@ -23,6 +23,9 @@ internal class UserSpamOffenceTracker
 		if (category == 2) ChatMedium += points;
 		if (category == 3) ChatLarge += points;
 		if (category == 4) ChatHuge += points;
+		if (category == 5) Embed += points;
+		if (category == 6) React += points;
+		if (category == 7) Ping += points;
 	}
 	public bool ShouldMute()
 	{
@@ -31,10 +34,18 @@ internal class UserSpamOffenceTracker
 		if (ChatLarge >= 3) return true;
 		if (ChatHuge >= 2) return true;
 
-		if (Embed >= 8) return true;
-		if (React >= 10) return true;
 		if (Ping >= 9) return true;
 
+		return false;
+	}
+	public bool ShouldReactMute()
+	{
+		if (React >= 10) return true;
+		return false;
+	}
+	public bool ShouldImageMute()
+	{
+		if (Embed >= 8) return true;
 		return false;
 	}
 
@@ -64,11 +75,19 @@ internal class SpamFilter
 			{
 				var userid = socketMessage.Author.Id;
 				DoMessageSpecificCooldown(userid, socketMessage.Content);
+				if (socketMessage.Embeds.Any()) DoGenericCooldown(userid, 5, 8);
+				if (socketMessage.MentionedUsers.Any()) DoGenericCooldown(userid, 7, 8);
 				if (UserSpamOffences.ContainsKey(userid) && UserSpamOffences[userid].ShouldMute())
 				{
 					var time = GetSpamMuteTimeForUser(userid);
 					Log.InServer(guild, $"Gave a spam filter mute to <@{userid}> for {time} seconds.");
-					Mutes.MuteUser(user, time);
+					user.Mute(time);
+				}
+				if (UserSpamOffences.ContainsKey(userid) && UserSpamOffences[userid].ShouldImageMute())
+				{
+					var time = GetSpamMuteTimeForUser(userid);
+					Log.InServer(guild, $"Gave an image spam filter mute to <@{userid}> for {time} seconds.");
+					user.ImageMute(time);
 				}
 			}
 		}
@@ -83,12 +102,12 @@ internal class SpamFilter
 			if (serverInstance.Config.SpamFilteredChannels.Contains(channel.Id))
 			{
 				var userid = user.Id;
-				DoReactCooldown(userid);
-				if (UserSpamOffences.ContainsKey(userid) && UserSpamOffences[userid].ShouldMute())
+				DoGenericCooldown(userid, 6, 8);
+				if (UserSpamOffences.ContainsKey(userid) && UserSpamOffences[userid].ShouldReactMute())
 				{
 					var time = GetSpamMuteTimeForUser(userid);
-					Log.InServer(guild, $"Gave a embed spam filter mute to <@{userid}> for {time} seconds.");
-					Mutes.MuteUser(user, time);
+					Log.InServer(guild, $"Gave a react spam filter mute to <@{userid}> for {time} seconds.");
+					user.ReactMute(time);
 				}
 			}
 		}
@@ -103,11 +122,14 @@ internal class SpamFilter
 		if (UserSpamOffences[userid].ShouldDispose()) UserSpamOffences.Remove(userid);
 
 	}
-	public static async Task DoReactCooldown(ulong userid)
+	public static async Task DoGenericCooldown(ulong userid, int category, int time)
 	{
-
+		if (!UserSpamOffences.ContainsKey(userid)) UserSpamOffences[userid] = new UserSpamOffenceTracker();
+		UserSpamOffences[userid].AddCooldownPointForCategory(category, 1);
+		await Task.Delay(time * 1000);
+		UserSpamOffences[userid].AddCooldownPointForCategory(category, -1);
+		if (UserSpamOffences[userid].ShouldDispose()) UserSpamOffences.Remove(userid);
 	}
-
 	public static void GetCooldownCategoryForUserAndMessage(ulong userid, string message, out int category, out int cooldowntime)
 	{
 		var lines = message.Split('\n').Count();

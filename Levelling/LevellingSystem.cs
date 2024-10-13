@@ -163,7 +163,7 @@ namespace OpenRobo.Levelling
 		{
 			var cmdparams = socketMessage.Content.Split(" ");
 
-			var role = CommandUtils.ParseToRoleID(cmdparams.Last());
+			var role = CommandUtils.ParseToID(cmdparams.Last());
 			var level = int.Parse(cmdparams[1]);
 
 			var guild = (socketMessage.Channel as SocketGuildChannel).Guild;

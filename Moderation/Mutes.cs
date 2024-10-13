@@ -7,6 +7,12 @@ namespace OpenRobo.Moderation;
 
 internal class Mutes
 {
+	public enum MuteType
+	{
+		ChatMute,
+		ReactMute,
+		ImageMute,
+	}
 	[Events.Tick]
 	public static void DoMuteTick()
 	{
@@ -15,32 +21,49 @@ internal class Mutes
 		{
 			foreach (var muteduser in server.Database.Users.Where(x => x.IsMuted && TimeUtil.TimeNow() >= x.MutedUntil))
 			{
-				UnMuteUser(server.Server.GetUser(muteduser.ID));
+				server.Server.GetUser(muteduser.ID).UnMute();
+			}
+			foreach (var muteduser in server.Database.Users.Where(x => x.IsReactMuted && TimeUtil.TimeNow() >= x.ReactMutedUntil))
+			{
+				server.Server.GetUser(muteduser.ID).UnReactMute();
+			}
+			foreach (var muteduser in server.Database.Users.Where(x => x.IsImageMuted && TimeUtil.TimeNow() >= x.ImageMutedUntil))
+			{
+				server.Server.GetUser(muteduser.ID).UnImageMute();
 			}
 		}
 	}
-	public static void UnMuteUser(SocketGuildUser user)
+
+	public static void SetUserMuted(SocketGuildUser user, MuteType type, bool mute, long time = 0)
 	{
 		var guild = user.Guild;
 		var db = ServerInstance.GetOrCreateServerInstance(guild);
 		var dbuser = db.GetOrRegisterUser(user);
 
-		user.RemoveRoleAsync(guild.GetRole(db.Config.MuteRole));
+		switch (type)
+		{
+			case MuteType.ChatMute:
+				if (mute) user.AddRoleAsync(guild.GetRole(db.Config.MuteRole));
+				else user.RemoveRoleAsync(guild.GetRole(db.Config.MuteRole));
+				dbuser.IsMuted = mute;
+				dbuser.MutedUntil = TimeUtil.TimeSecondsFromNow(time);
+				break;
+			case MuteType.ReactMute:
+				if (mute) user.AddRoleAsync(guild.GetRole(db.Config.ReactMuteRole));
+				else user.RemoveRoleAsync(guild.GetRole(db.Config.ReactMuteRole));
+				dbuser.IsReactMuted = mute;
+				dbuser.ReactMutedUntil = TimeUtil.TimeSecondsFromNow(time);
+				break;
+			case MuteType.ImageMute:
+				if (mute) user.AddRoleAsync(guild.GetRole(db.Config.ImageMuteRole));
+				else user.RemoveRoleAsync(guild.GetRole(db.Config.ImageMuteRole));
+				dbuser.IsImageMuted = mute;
+				dbuser.ImageMutedUntil = TimeUtil.TimeSecondsFromNow(time);
+				break;
+			default:
+				break;
+		}
 
-		dbuser.IsMuted = false;
-
-		db.SaveChanges();
-	}
-	public static void MuteUser(SocketGuildUser user, long time)
-	{
-		var guild = user.Guild;
-		var db = ServerInstance.GetOrCreateServerInstance(guild);
-		var dbuser = db.GetOrRegisterUser(user);
-
-		user.AddRoleAsync(guild.GetRole(db.Config.MuteRole));
-
-		dbuser.IsMuted = true;
-		dbuser.MutedUntil = TimeUtil.TimeSecondsFromNow(time);
 
 		db.SaveChanges();
 	}
@@ -53,7 +76,7 @@ internal class Mutes
 		if (authoruser.GuildPermissions.ModerateMembers)
 		{
 			var guild = (socketMessage.Channel as SocketGuildChannel).Guild;
-			var targetuser = guild.GetUser(CommandUtils.ParseToUserID(cmdparams[1]));
+			var targetuser = guild.GetUser(CommandUtils.ParseToID(cmdparams[1]));
 
 			// this is in seconds
 			long time = 60;
@@ -66,7 +89,6 @@ internal class Mutes
 				timestring = TimeUtil.ParseStringToString(string.Join(" ", cmdparams.Skip(2)));
 			}
 
-			MuteUser(targetuser, time);
 			var db = ServerInstance.GetOrCreateServerInstance(guild);
 			var dbuser = db.GetOrRegisterUser(targetuser);
 			if (!dbuser.IsMuted)
@@ -78,6 +100,8 @@ internal class Mutes
 				socketMessage.Channel.SendMessageAsync($"{targetuser.Username} mute changed to {timestring}.");
 			}
 
+			targetuser.Mute(time);
+
 		}
 	}
 	[ChatCommand("unmute")]
@@ -88,9 +112,9 @@ internal class Mutes
 		if (authoruser.GuildPermissions.ModerateMembers)
 		{
 			var guild = (socketMessage.Channel as SocketGuildChannel).Guild;
-			var targetuser = guild.GetUser(CommandUtils.ParseToUserID(cmdparams[1]));
+			var targetuser = guild.GetUser(CommandUtils.ParseToID(cmdparams[1]));
 
-			UnMuteUser(targetuser);
+			targetuser.UnMute();
 			socketMessage.Channel.SendMessageAsync($"{targetuser.Username} unmuted.");
 
 		}
@@ -101,7 +125,7 @@ internal class Mutes
 	{
 		var cmdparams = socketMessage.Content.Split(" ");
 
-		var role = CommandUtils.ParseToRoleID(cmdparams.Last());
+		var role = CommandUtils.ParseToID(cmdparams.Last());
 
 		var guild = (socketMessage.Channel as SocketGuildChannel).Guild;
 		var guilduser = (socketMessage.Author as SocketGuildUser);
