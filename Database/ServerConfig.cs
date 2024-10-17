@@ -14,6 +14,7 @@ public class ServerConfig
 	public ulong ImageMuteRole { get; set; } = 0;
 	public ulong ReactMuteRole { get; set; } = 0;
 	public List<ulong> SpamFilteredChannels { get; set; } = new();
+	[ConfigType.IntAndRoleSelection]
 	public Dictionary<int, ulong> LevellingRoleRewards { get; set; } = new();
 
 	[ChatCommand("setsetting")]
