@@ -1,0 +1,28 @@
+﻿@page "/Servers/{serverid}/Configure"
+
+@using System.Reflection;
+@using OpenRobo;
+@using OpenRobo.Database;
+
+<div>
+	<h1>Server Settings</h1>
+	@{
+		var g = MainGlobal.Client.GetGuild(ulong.Parse(serverid));
+		var b = OpenRobo.Database.ServerInstance.GetOrCreateServerInstance(g);
+	}
+	<div class="d-grid gap-2">
+		@foreach (var setting in typeof(ServerConfig).GetProperties())
+		{
+			var value = setting.GetValue(b.Config);
+			if (setting != null )
+			{
+				<SettingBox ThisProperty=@setting Object=@b.Config />
+			}
+		}
+	</div>
+</div>
+
+@code {
+	[Parameter]
+	public string serverid { get; set; }
+}

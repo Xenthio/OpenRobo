@@ -1,3 +1,4 @@
+using OpenRobo.WebUI.Components;
 namespace OpenRobo.WebUI;
 
 public class MainWebUI
@@ -15,24 +16,26 @@ public class MainWebUI
 		var builder = WebApplication.CreateBuilder(opts);
 
 		// Add services to the container.
-		builder.Services.AddRazorPages().WithRazorPagesRoot("/WebUI/Pages").AddRazorRuntimeCompilation();
+		builder.Services.AddRazorComponents()
+			.AddInteractiveServerComponents();
 
 		var app = builder.Build();
 
 		// Configure the HTTP request pipeline.
 		if (!app.Environment.IsDevelopment())
 		{
-			app.UseExceptionHandler("/Error");
+			app.UseExceptionHandler("/Error", createScopeForErrors: true);
 			// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
 			app.UseHsts();
 		}
 
 		app.UseHttpsRedirection();
+
 		app.UseStaticFiles();
+		app.UseAntiforgery();
 
-		app.UseRouting();
-
-		app.MapRazorPages();
+		app.MapRazorComponents<App>()
+			.AddInteractiveServerRenderMode();
 
 		app.Run();
 	}

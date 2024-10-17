@@ -1,0 +1,43 @@
+﻿@using System.Reflection;
+@using OpenRobo;
+@using OpenRobo.Database;
+
+<div class="border rounded">
+	<div class="row g-0 align-items-center">
+		<h4 class="p-2 col">@(ThisProperty.Name)</h4>
+		@if (ThisProperty.GetCustomAttribute<ConfigType.IntAndRoleSelectionAttribute>() is ConfigType.IntAndRoleSelectionAttribute Attribute && ThisProperty.GetValue(Object) is Dictionary<int, ulong> dictionary)
+		{
+			@foreach (var levelrolecombo in dictionary)
+			{
+				<div class="row">
+					<div class="p-2 col">
+						<div>@("Level")</div>
+						<input type="text" class="form-control textbox-parameters" value="@levelrolecombo.Key" @onchange="this.OnChange">
+					</div>
+					<div class="p-2 col">
+						<div>@("Role Id")</div>
+						<input type="text" class="form-control textbox-parameters" value="@levelrolecombo.Value" @onchange="this.OnChange">
+					</div>
+				</div>
+			}
+		}
+		else if (ThisProperty.GetValue(Object) is object value)
+		{
+			<div class="p-2 col-3">
+				<input type="text" class="form-control textbox-parameters" value="@value" @onchange="this.OnChange">
+			</div>
+		}
+	</div>
+</div>
+
+@code {
+	[Parameter]
+	public PropertyInfo ThisProperty { get; set; }
+	[Parameter]
+	public object Object { get; set; }
+	private void OnChange(ChangeEventArgs e)
+	{
+		var newvalue = Convert.ChangeType(e.Value, ThisProperty.PropertyType);
+		ThisProperty.SetValue(Object, newvalue);
+	}
+}

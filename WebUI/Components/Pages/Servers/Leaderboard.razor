@@ -1,20 +1,17 @@
 ﻿@page "/Servers/{serverid}/Leaderboard"
-@model LeaderboardModel
-@{
-	ViewData["Title"] = "server list";
-}
+
 @using OpenRobo;
 
 <div>
 	<h1>User Leaderboard</h1>
 	@{
-		var g = MainGlobal.Client.GetGuild(ulong.Parse((string)(RouteData.Values["serverid"])));
+		var g = MainGlobal.Client.GetGuild(ulong.Parse(serverid));
 		var b = OpenRobo.Database.ServerInstance.GetOrCreateServerInstance(g);
 	}
 	<div class="d-grid gap-2">
-		@foreach (var user in b.Database.Users.OrderBy(x => -x.XP))
+		@foreach (var user in b.Database.Users.OrderBy(x => -x.Level))
 		{
-			var discorduser = await MainGlobal.Client.GetUserAsync(user.ID);
+			var discorduser = MainGlobal.Client.GetUser(user.ID);
 			if (discorduser != null && !discorduser.IsBot)
 			{
 				<div class="border rounded">
@@ -31,3 +28,8 @@
 		}
 	</div>
 </div>
+@code {
+
+	[Parameter]
+	public string serverid { get; set; } 
+}

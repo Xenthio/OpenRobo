@@ -7,9 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="WebUI\wwwroot\css\site.css" />
     <Content Include="WebUI\wwwroot\favicon.ico" />
-    <Content Include="WebUI\wwwroot\js\site.js" />
     <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css" />
     <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map" />
     <Content Include="WebUI\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css" />
