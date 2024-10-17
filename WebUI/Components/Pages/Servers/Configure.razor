@@ -5,18 +5,15 @@
 @using OpenRobo.Database;
 
 <div>
-	<h1>Server Settings</h1>
-	@{
-		var g = MainGlobal.Client.GetGuild(ulong.Parse(serverid));
-		var b = OpenRobo.Database.ServerInstance.GetOrCreateServerInstance(g);
-	}
+	<h1>Server Settings</h1> 
 	<div class="d-grid gap-2">
+		<button class="btn btn-success" @onclick="SaveChanges">Save All Changes</button>
 		@foreach (var setting in typeof(ServerConfig).GetProperties())
 		{
-			var value = setting.GetValue(b.Config);
+			var value = setting.GetValue(ServerInstance.Config);
 			if (setting != null )
 			{
-				<SettingBox ThisProperty=@setting Object=@b.Config />
+				<SettingBox ServerID=@ulong.Parse(serverid) ThisProperty=@setting Object=@ServerInstance.Config />
 			}
 		}
 	</div>
@@ -25,4 +22,16 @@
 @code {
 	[Parameter]
 	public string serverid { get; set; }
+	private Discord.WebSocket.SocketGuild Guild;
+	private ServerInstance ServerInstance;
+	protected override void OnInitialized()
+	{
+		Guild = MainGlobal.Client.GetGuild(ulong.Parse(serverid));
+		ServerInstance = OpenRobo.Database.ServerInstance.GetOrCreateServerInstance(Guild);
+		base.OnInitialized();
+	}
+	private void SaveChanges()
+	{
+		ServerInstance.SaveServerConfig();
+	}
 }

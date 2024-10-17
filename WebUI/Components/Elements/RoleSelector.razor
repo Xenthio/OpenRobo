@@ -1,0 +1,38 @@
+﻿@using System.Reflection;
+@using OpenRobo;
+@using OpenRobo.Database;
+@using OpenRobo.WebUI.Components.Elements
+ 
+<Dropdown TItem="ulong" OnSelected="@OnSelected" >
+	<InitialTip>
+		@if (RoleID != 0)
+		{
+			@(MainGlobal.Client.GetGuild(ServerID).GetRole(RoleID).Name)
+		} 
+		else
+		{
+			@("Select a role")
+		}
+
+	</InitialTip>
+    <ChildContent>
+		@foreach (var role in MainGlobal.Client.GetGuild(ServerID).Roles)
+		{
+			<DropdownListItem Item="@role.Id">@role.Name</DropdownListItem>
+		} 
+    </ChildContent>
+</Dropdown>
+
+@code {
+	[Parameter]
+	public ulong RoleID { get; set; }
+	[Parameter]
+	public ulong ServerID { get; set; }
+	[Parameter]
+	public EventCallback<ulong> OnChange { get; set; }
+	private void OnSelected(ulong newvalue)
+	{
+		RoleID = newvalue;
+		OnChange.InvokeAsync(RoleID);
+	}
+}

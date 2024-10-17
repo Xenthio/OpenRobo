@@ -1,0 +1,63 @@
+﻿@using System.Reflection;
+@using OpenRobo;
+@using OpenRobo.Database;
+@using OpenRobo.WebUI.Components.Elements
+@namespace OpenRobo.WebUI.Components
+
+<div class="border rounded">
+	<div class="row g-0 align-items-center">
+		<h4 class="p-2 col">@(ThisProperty.Name)</h4>
+		@if (ThisProperty.GetCustomAttribute<ConfigType.IntAndRoleSelectionAttribute>() is ConfigType.IntAndRoleSelectionAttribute && ThisProperty.GetValue(Object) is Dictionary<int, ulong> dictionary)
+		{
+			@foreach (var levelrolecombo in dictionary)
+			{
+				<div class="row">
+					<div class="p-2 col">
+						<div>@("Level")</div>
+						<input type="text" class="form-control textbox-parameters" value="@levelrolecombo.Key" @onchange="this.OnInputChange">
+					</div>
+					<div class="p-2 col">
+						<div>@("Role")</div>
+						<RoleSelector ServerID=@ServerID RoleID=@levelrolecombo.Value OnChange="id => this.ChangeSetting(id)" /> 
+					</div>
+				</div>
+			}
+		}
+		else if (ThisProperty.GetCustomAttribute<ConfigType.ChannelSelectionAttribute>() is ConfigType.ChannelSelectionAttribute && ThisProperty.GetValue(Object) is ulong channelid)
+		{
+			<div class="p-2 col-3">
+				<ChannelSelector ServerID=@ServerID ChannelID=@channelid OnChange="id => this.ChangeSetting(id)" />
+			</div>
+		}
+		else if (ThisProperty.GetCustomAttribute<ConfigType.RoleSelectionAttribute>() is ConfigType.RoleSelectionAttribute && ThisProperty.GetValue(Object) is ulong roleid)
+		{
+			<div class="p-2 col-3">
+				<RoleSelector ServerID=@ServerID RoleID=@roleid OnChange="id => this.ChangeSetting(id)" />
+			</div>
+		}
+		else if (ThisProperty.GetValue(Object) is object value)
+		{
+			<div class="p-2 col-3">
+				<input type="text" class="form-control textbox-parameters" value="@value" @onchange="this.OnInputChange">
+			</div>
+		}
+	</div>
+</div>
+
+@code {
+	[Parameter]
+	public PropertyInfo ThisProperty { get; set; }
+	[Parameter]
+	public object Object { get; set; }
+	[Parameter]
+	public ulong ServerID { get; set; } 
+	private void OnInputChange(ChangeEventArgs e)
+	{
+		ChangeSetting(e.Value);
+	}
+	private void ChangeSetting(object value)
+	{
+		var newvalue = Convert.ChangeType(value, ThisProperty.PropertyType);
+		ThisProperty.SetValue(Object, newvalue);
+	}
+}

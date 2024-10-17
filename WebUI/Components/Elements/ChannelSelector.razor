@@ -1,0 +1,38 @@
+﻿@using System.Reflection;
+@using OpenRobo;
+@using OpenRobo.Database;
+@using OpenRobo.WebUI.Components.Elements
+ 
+<Dropdown TItem="ulong" OnSelected="@OnSelected" >
+	<InitialTip>
+		@if (ChannelID != 0)
+		{
+			@(MainGlobal.Client.GetGuild(ServerID).GetChannel(ChannelID).Name)
+		} 
+		else
+		{
+			@("Select a channel")
+		}
+
+	</InitialTip>
+    <ChildContent>
+		@foreach (var channel in MainGlobal.Client.GetGuild(ServerID).Channels)
+		{
+			<DropdownListItem Item="@channel.Id">@channel.Name</DropdownListItem>
+		} 
+    </ChildContent>
+</Dropdown>
+
+@code {
+	[Parameter]
+	public ulong ChannelID { get; set; }
+	[Parameter]
+	public ulong ServerID { get; set; }
+	[Parameter]
+	public EventCallback<ulong> OnChange { get; set; }
+	private void OnSelected(ulong newvalue)
+	{
+		ChannelID = newvalue;
+		OnChange.InvokeAsync(ChannelID);
+	}
+}
