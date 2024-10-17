@@ -7,7 +7,7 @@
 <div class="border rounded">
 	<div class="row g-0 align-items-center">
 		<h4 class="p-2 col">@(ThisProperty.Name)</h4>
-		@if (ThisProperty.GetCustomAttribute<ConfigType.IntAndRoleSelectionAttribute>() is ConfigType.IntAndRoleSelectionAttribute && ThisProperty.GetValue(Object) is Dictionary<int, ulong> dictionary)
+		@if (ThisProperty.GetCustomAttribute<ConfigType.IntAndRoleListAttribute>() is ConfigType.IntAndRoleListAttribute && ThisProperty.GetValue(Object) is Dictionary<int, ulong> dictionary)
 		{
 			@foreach (var levelrolecombo in dictionary)
 			{
@@ -18,8 +18,17 @@
 					</div>
 					<div class="p-2 col">
 						<div>@("Role")</div>
-						<RoleSelector ServerID=@ServerID RoleID=@levelrolecombo.Value OnChange="id => this.ChangeSetting(id)" /> 
+						<RoleSelector ServerID=@ServerID RoleID=@levelrolecombo.Value OnChange="id => {dictionary[levelrolecombo.Key] = id; this.ChangeSetting(dictionary);}" /> 
 					</div>
+				</div>
+			}
+		}
+		else if (ThisProperty.GetCustomAttribute<ConfigType.ChannelListAttribute>() is ConfigType.ChannelListAttribute && ThisProperty.GetValue(Object) is List<ulong> channels)
+		{
+			@foreach (var channelid in channels)
+			{ 
+				<div class="p-2 col-3">
+					<ChannelSelector ServerID=@ServerID ChannelID=@channelid OnChange="id => {channels[channels.IndexOf(channelid)] = channelid; this.ChangeSetting(channels);}" />
 				</div>
 			}
 		}
