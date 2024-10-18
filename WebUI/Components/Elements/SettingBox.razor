@@ -6,31 +6,51 @@
 
 <div class="border rounded">
 	<div class="row g-0 align-items-center">
-		<h4 class="p-2 col">@(ThisProperty.Name)</h4>
+		@{ 
+			var st = Guid.NewGuid().ToString();
+		}
+		<h4 class="p-2 col">@(ThisProperty.Name)</h4> 
 		@if (ThisProperty.GetCustomAttribute<ConfigType.IntAndRoleListAttribute>() is ConfigType.IntAndRoleListAttribute && ThisProperty.GetValue(Object) is Dictionary<int, ulong> dictionary)
 		{
-			@foreach (var levelrolecombo in dictionary)
-			{
-				<div class="row">
-					<div class="p-2 col">
-						<div>@("Level")</div>
-						<input type="text" class="form-control textbox-parameters" value="@levelrolecombo.Key" @onchange="this.OnInputChange">
-					</div>
-					<div class="p-2 col">
-						<div>@("Role")</div>
-						<RoleSelector ServerID=@ServerID RoleID=@levelrolecombo.Value OnChange="id => {dictionary[levelrolecombo.Key] = id; this.ChangeSetting(dictionary);}" /> 
-					</div>
+			<button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target=@($"#{st}") aria-expanded="false" aria-controls=@st>
+				Show/Hide
+			</button>
+			<div class="collapse" id=@st>
+				<div class="card card-body">
+					@foreach (var levelrolecombo in dictionary)
+					{
+						<div class="row">
+							<div class="p-2 col">
+								<div>@("Level")</div>
+								<input type="text" class="form-control textbox-parameters" value="@levelrolecombo.Key" @onchange="this.OnInputChange">
+							</div>
+							<div class="p-2 col">
+								<div>@("Role")</div>
+								<RoleSelector ServerID=@ServerID RoleID=@levelrolecombo.Value OnChange="id => {dictionary[levelrolecombo.Key] = id; this.ChangeSetting(dictionary);}" />
+							</div>
+						</div>
+					}
 				</div>
-			}
+			</div>
 		}
 		else if (ThisProperty.GetCustomAttribute<ConfigType.ChannelListAttribute>() is ConfigType.ChannelListAttribute && ThisProperty.GetValue(Object) is List<ulong> channels)
 		{
-			@foreach (var channelid in channels)
-			{ 
-				<div class="p-2 col-3">
-					<ChannelSelector ServerID=@ServerID ChannelID=@channelid OnChange="id => {channels[channels.IndexOf(channelid)] = channelid; this.ChangeSetting(channels);}" />
+			<button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target=@($"#{st}") aria-expanded="false" aria-controls=@st>
+				Show/Hide
+			</button>
+			<div class="collapse" id=@st>
+				<div class="card card-body">
+					@foreach (var channelid in channels)
+					{
+						<div class="row">
+							<div class="p-2 col-3">
+								<ChannelSelector ServerID=@ServerID ChannelID=@channelid OnChange="id => {channels[channels.IndexOf(channelid)] = channelid; this.ChangeSetting(channels);}" />
+							</div>
+						</div>
+					}
 				</div>
-			}
+			</div>
+			
 		}
 		else if (ThisProperty.GetCustomAttribute<ConfigType.ChannelSelectionAttribute>() is ConfigType.ChannelSelectionAttribute && ThisProperty.GetValue(Object) is ulong channelid)
 		{
