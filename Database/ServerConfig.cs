@@ -19,14 +19,20 @@ public class ServerConfig
 	[ChatCommand("setsetting")]
 	public static void SetSetting(SocketMessage socketMessage)
 	{
+		var guild = (socketMessage.Channel as SocketGuildChannel).Guild;
+		var guilduser = (socketMessage.Author as SocketGuildUser);
+		if (!guilduser.GuildPermissions.Administrator)
+		{
+			socketMessage.Channel.SendMessageAsync($"No perms to change settings");
+			return;
+		}
 		var cmdparams = socketMessage.Content.Split(" ");
-
+		if (cmdparams.Count() <= 2) return;
 		var settingname = cmdparams[1];
 		var value = cmdparams[2];
 
-		var guild = (socketMessage.Channel as SocketGuildChannel).Guild;
-		var guilduser = (socketMessage.Author as SocketGuildUser);
-		if (guilduser.GuildPermissions.Administrator && typeof(ServerConfig).GetProperty(settingname) is PropertyInfo property)
+
+		if (typeof(ServerConfig).GetProperty(settingname) is PropertyInfo property)
 		{
 			var db = ServerInstance.GetOrCreateServerInstance(guild);
 			var oldvalue = property.GetValue(db.Config);

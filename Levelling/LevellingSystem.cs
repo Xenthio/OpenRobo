@@ -102,6 +102,34 @@ namespace OpenRobo.Levelling
 
 			userdata.Level = level;
 			serverInstance.SaveChanges();
+
+			// Update user's roles to match their level
+			if (user is SocketGuildUser guildUser)
+			{
+				// Remove roles that are no longer applicable
+				var rolesToRemove = guildUser.Roles
+				.Where(role => serverInstance.Config.LevellingRoleRewards.Values.Contains(role.Id) &&
+				   serverInstance.Config.LevellingRoleRewards.Any(reward => reward.Key > level && reward.Value == role.Id))
+				.ToList();
+
+				foreach (var role in rolesToRemove)
+				{
+					guildUser.RemoveRoleAsync(role);
+				}
+
+				// Add roles that are now applicable
+				foreach (var reward in serverInstance.Config.LevellingRoleRewards)
+				{
+					if (level >= reward.Key)
+					{
+						var role = server.GetRole(reward.Value);
+						if (role != null && !guildUser.Roles.Any(r => r.Id == role.Id))
+						{
+							guildUser.AddRoleAsync(role);
+						}
+					}
+				}
+			}
 		}
 
 		[ChatCommand("rank")]
@@ -126,7 +154,9 @@ namespace OpenRobo.Levelling
 			var guild = guilduser.Guild;
 			if (guilduser.GuildPermissions.Administrator)
 			{
-				SetXP(guild, socketMessage.Author, xp);
+				var targetuser = guild.GetUser(CommandUtils.ParseToID(cmdparams[1]));
+				SetXP(guild, targetuser, xp);
+				socketMessage.Channel.SendMessageAsync($"Set the xp of {targetuser.Id} to {xp}");
 			}
 		}
 		[ChatCommand("setlevel")]
@@ -140,7 +170,9 @@ namespace OpenRobo.Levelling
 			var guild = guilduser.Guild;
 			if (guilduser.GuildPermissions.Administrator)
 			{
-				SetLevel(guild, socketMessage.Author, level);
+				var targetuser = guild.GetUser(CommandUtils.ParseToID(cmdparams[1]));
+				SetLevel(guild, targetuser, level);
+				socketMessage.Channel.SendMessageAsync($"Set the level of {targetuser.Id} to {level}");
 			}
 		}
 
